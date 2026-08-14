@@ -16,9 +16,11 @@ async function bootstrap() {
         transform: true,
         transformOptions: { enableImplicitConversion: true },
     }));
-    app.useStaticAssets((0, path_1.join)(process.cwd(), process.env.UPLOADS_DIR ?? 'uploads'), {
-        prefix: '/uploads/',
-    });
+    if (!process.env.VERCEL) {
+        app.useStaticAssets((0, path_1.join)(process.cwd(), process.env.UPLOADS_DIR ?? 'uploads'), {
+            prefix: '/uploads/',
+        });
+    }
     app.setGlobalPrefix('api');
     await app.listen(process.env.PORT ?? 4000);
 }
