@@ -1,0 +1,546 @@
+{
+  "info": {
+    "_postman_id": "iit-alumni-api-collection",
+    "name": "IIT Alumni API",
+    "description": "NestJS REST API for IIT Alumni Management. Base URL: {{baseUrl}}. Run Login or Register first to auto-populate {{authToken}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000/api",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "applicationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alumniId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) {",
+                  "  pm.collectionVariables.set('authToken', res.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Create a new user account. Role defaults to USER. Auto-sets {{authToken}}."
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) {",
+                  "  pm.collectionVariables.set('authToken', res.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login with email and password. Auto-sets {{authToken}}."
+          }
+        },
+        {
+          "name": "Login (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.accessToken) {",
+                  "  pm.collectionVariables.set('adminToken', res.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"adminpassword\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login as an admin user. Auto-sets {{adminToken}}."
+          }
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Returns the authenticated user's profile including optional alumni profile. Requires JWT."
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password"]
+            },
+            "description": "Sends a password reset email. Returns { success: true } regardless of whether email exists (security)."
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"<reset-token-from-email>\",\n  \"password\": \"newpassword123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            },
+            "description": "Reset password using the token received via email. Minimum 8 characters for new password."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alumni - Public",
+      "item": [
+        {
+          "name": "Get Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alumni/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "stats"]
+            },
+            "description": "Returns total registered alumni, certified alumni count, and number of countries represented."
+          }
+        },
+        {
+          "name": "Get Alumni Preview",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alumni/preview",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "preview"]
+            },
+            "description": "Returns a limited preview (4 records) of alumni for public landing pages."
+          }
+        },
+        {
+          "name": "Submit Application",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "fullName", "value": "Jane Smith", "type": "text" },
+                { "key": "email", "value": "jane.smith@example.com", "type": "text" },
+                { "key": "phone", "value": "+1234567890", "type": "text" },
+                { "key": "linkedin", "value": "https://linkedin.com/in/janesmith", "type": "text" },
+                { "key": "designation", "value": "Trade Finance Manager", "type": "text" },
+                { "key": "organization", "value": "Global Bank Ltd", "type": "text" },
+                { "key": "yearsExperience", "value": "8", "type": "text" },
+                { "key": "careerStage", "value": "Mid-level", "type": "text" },
+                {
+                  "key": "certification",
+                  "value": "CDCS",
+                  "description": "One of: CDCS, CSDG, CITF, CTFP, OTHER",
+                  "type": "text"
+                },
+                { "key": "yearCompleted", "value": "2022", "type": "text" },
+                {
+                  "key": "proof",
+                  "description": "Optional PDF/JPG/PNG proof file (max 5MB)",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alumni/applications",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "applications"]
+            },
+            "description": "Submit a new alumni membership application. Optionally attach a certification proof file (PDF/JPG/PNG, max 5MB). Certification values: CDCS | CSDG | CITF | CTFP | OTHER."
+          }
+        },
+        {
+          "name": "Get My Application Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/alumni/applications/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "applications", "me"]
+            },
+            "description": "Returns the authenticated user's latest application and its status (PENDING | APPROVED | REJECTED). Returns null if no application submitted."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alumni - Members",
+      "item": [
+        {
+          "name": "Search Alumni Directory",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/alumni?search=&certification=&country=",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni"],
+              "query": [
+                { "key": "search", "value": "", "description": "Search by name, designation, or organization" },
+                {
+                  "key": "certification",
+                  "value": "",
+                  "description": "Filter by certification: CDCS | CSDG | CITF | CTFP | OTHER"
+                },
+                { "key": "country", "value": "", "description": "Filter by country" }
+              ]
+            },
+            "description": "Search and filter the alumni member directory. Requires ALUMNI or ADMIN role."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Applications",
+      "item": [
+        {
+          "name": "List All Applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/alumni/admin/applications?status=PENDING",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "admin", "applications"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING",
+                  "description": "Filter by status: PENDING | APPROVED | REJECTED (omit for all)"
+                }
+              ]
+            },
+            "description": "List all alumni applications. Optionally filter by status. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Approve Application",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.id) {",
+                  "  pm.collectionVariables.set('alumniId', res.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/alumni/admin/applications/{{applicationId}}/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "admin", "applications", "{{applicationId}}", "approve"]
+            },
+            "description": "Approve an alumni application. Creates an AlumniProfile and promotes the user's role to ALUMNI. Set {{applicationId}} first. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Reject Application",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Insufficient proof of certification provided.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alumni/admin/applications/{{applicationId}}/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "admin", "applications", "{{applicationId}}", "reject"]
+            },
+            "description": "Reject an alumni application with an optional reason. Set {{applicationId}} first. Requires ADMIN role."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Directory",
+      "item": [
+        {
+          "name": "Get All Alumni (Admin View)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/alumni/admin/directory",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "admin", "directory"]
+            },
+            "description": "Full alumni directory listing for admin. Includes type (AUTOMATIC | HONORARY), batch, and status. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Create Honorary Alumni",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Dr. Alan Brown", "type": "text" },
+                { "key": "email", "value": "alan.brown@example.com", "type": "text" },
+                { "key": "designation", "value": "Distinguished Fellow", "type": "text" },
+                { "key": "organization", "value": "International Trade Council", "type": "text" },
+                {
+                  "key": "bio",
+                  "value": "Renowned expert in trade finance with 30 years of experience.",
+                  "type": "text"
+                },
+                {
+                  "key": "photo",
+                  "description": "Optional profile photo (JPG/PNG, max 5MB)",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alumni/admin/honorary",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "admin", "honorary"]
+            },
+            "description": "Manually add an honorary alumni member with an optional photo. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Update Alumni Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designation\": \"Senior Trade Finance Specialist\",\n  \"organization\": \"Global Bank Ltd\",\n  \"batch\": \"2022\",\n  \"country\": \"Singapore\",\n  \"certification\": \"CDCS\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alumni/admin/{{alumniId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "admin", "{{alumniId}}"]
+            },
+            "description": "Update an alumni profile's designation, organization, batch, country, or certification. All fields optional. Certification values: CDCS | CSDG | CITF | CTFP | OTHER. Requires ADMIN role."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin - Privileges",
+      "item": [
+        {
+          "name": "Get Default Privileges",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/alumni/admin/privileges/defaults",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "admin", "privileges", "defaults"]
+            },
+            "description": "Get the global default privilege settings applied to all alumni. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Update Default Privileges",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"certDiscountPercent\": 20,\n  \"blogDiscountPercent\": 10\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alumni/admin/privileges/defaults",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "admin", "privileges", "defaults"]
+            },
+            "description": "Update global default privilege percentages. Values must be 0–100. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "List All Member Privileges",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/alumni/admin/privileges?search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "admin", "privileges"],
+              "query": [
+                { "key": "search", "value": "", "description": "Optional search by alumni name" }
+              ]
+            },
+            "description": "List all alumni members with their individual privilege settings. Requires ADMIN role."
+          }
+        },
+        {
+          "name": "Update Member Privileges",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"certDiscountPercent\": 30,\n  \"freeCertifications\": \"CDCS\",\n  \"blogAccess\": true,\n  \"forumAccess\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alumni/admin/{{alumniId}}/privileges",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "admin", "{{alumniId}}", "privileges"]
+            },
+            "description": "Override privilege settings for a specific alumni member. All fields are optional. certDiscountPercent must be 0–100. Requires ADMIN role."
+          }
+        }
+      ]
+    }
+  ]
+}

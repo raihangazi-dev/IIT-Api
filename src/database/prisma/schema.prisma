@@ -1,12 +1,132 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  ALUMNI
+  USER
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AlumniType {
+  AUTOMATIC
+  HONORARY
+}
+
+enum Certification {
+  CDCS
+  CSDG
+  CITF
+  CTFP
+  OTHER
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  role          Role      @default(USER)
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  alumniProfile        AlumniProfile?
+  passwordResetTokens  PasswordResetToken[]
+
+  @@map("users")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model AlumniApplication {
+  id                String            @id @default(uuid())
+  fullName          String
+  email             String
+  phone             String
+  linkedin          String?
+  designation       String
+  organization      String
+  yearsExperience   String?
+  careerStage       String?
+  certification     Certification
+  yearCompleted     String
+  proofFileUrl      String?
+  status            ApplicationStatus @default(PENDING)
+  reviewedAt        DateTime?
+  reviewedByUserId  String?
+  rejectionReason   String?
+  createdAt         DateTime          @default(now())
+
+  alumniProfile     AlumniProfile?
+
+  @@index([status])
+  @@map("alumni_applications")
+}
+
+model AlumniProfile {
+  id                    String         @id @default(uuid())
+  userId                String?        @unique
+  user                  User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  applicationId         String?        @unique
+  application           AlumniApplication? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  name                  String
+  email                 String         @unique
+  phone                 String?
+  linkedin              String?
+  designation           String
+  organization          String
+  country               String?
+  batch                 String?
+  certification         Certification?
+  type                  AlumniType     @default(AUTOMATIC)
+  avatarColor           String?
+  photoUrl              String?
+  bio                   String?
+
+  // Privileges
+  certDiscountPercent   Int            @default(20)
+  freeCertifications    String         @default("none")
+  blogAccess            Boolean        @default(true)
+  forumAccess           Boolean        @default(true)
+
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  @@index([type])
+  @@map("alumni_profiles")
+}
+
+model AlumniPrivilegeDefaults {
+  id                    String   @id @default("default")
+  certDiscountPercent   Int      @default(20)
+  blogDiscountPercent   Int      @default(0)
+  updatedAt             DateTime @updatedAt
+
+  @@map("alumni_privilege_defaults")
 }
