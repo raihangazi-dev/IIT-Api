@@ -21,9 +21,11 @@ async function bootstrap() {
     }),
   );
 
-  app.useStaticAssets(join(process.cwd(), process.env.UPLOADS_DIR ?? 'uploads'), {
-    prefix: '/uploads/',
-  });
+  if (!process.env.VERCEL) {
+    app.useStaticAssets(join(process.cwd(), process.env.UPLOADS_DIR ?? 'uploads'), {
+      prefix: '/uploads/',
+    });
+  }
 
   app.setGlobalPrefix('api');
 

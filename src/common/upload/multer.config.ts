@@ -2,13 +2,17 @@ import { BadRequestException } from '@nestjs/common';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { randomBytes } from 'crypto';
+import { mkdirSync } from 'fs';
 
 const ALLOWED_EXTENSIONS = new Set(['.pdf', '.jpg', '.jpeg', '.png']);
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
+const uploadDir = process.env.VERCEL ? '/tmp/uploads' : (process.env.UPLOADS_DIR ?? 'uploads');
+if (process.env.VERCEL) mkdirSync(uploadDir, { recursive: true });
+
 export const uploadFileInterceptorOptions = {
   storage: diskStorage({
-    destination: process.env.UPLOADS_DIR ?? 'uploads',
+    destination: uploadDir,
     filename: (_req, file, callback) => {
       const unique = randomBytes(16).toString('hex');
       callback(null, `${unique}${extname(file.originalname)}`);
